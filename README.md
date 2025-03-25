@@ -1,12 +1,21 @@
-# cache
+# Ao baixar esse repositório siga os passos. 
+ - 1 `copy .env.example .env` ou `cp .env.example .env`
+ - 2 mudar no arquivo .env: `CACHE_DRIVER=redis`
+ - 3 `docker-compose up -d --build`
+ - 4 `docker exec -it cache-laravel_laravel.test_1`(sem terminal wsl2)
+ - 5 `composer install` ou `composer update`
+ - 6 Dentro do container execute `php artisan key:generate` (se estiver sem terminal wsl2)
+    * OU  `./vendor/bin/sail artisan key:generate` (com terminal wls2)
 
-- Cache: Forma de armazenar dados temporariamente, de forma que a informação seja mais acessivel ou tenha um rápido acesso, evitando uso desnecessários da CPU.
+# Cache
+
+ É a forma de armazenar dados temporariamente, de forma que a informação seja mais acessivel ou tenha um rápido acesso, evitando uso desnecessários da CPU.
 - Ao usar cache, evita cargas de processamento, pois usamos dados que estão na memória.
 - Não precisa adicionar mais uma tarefa para o banco, evitando varios acessos desnecessarios.
 
 Exemplos de utilização: 
-    1 - Session do usuário em cache: Ao puxar as informações do usuário pela primeira vez, salva as informações necessárias no cache, adicionar um tempo para vencer essas informações e a session cair;
-    2 - Loops encadeados: Dentro de um loop encadeado, caso precise acessar informações no banco, é interessante salvar as informações que preciso dentro de cache. Exemplo: Se dentro de cada loop preciso pesquisar o nome de um objeto a partir do ID, inveés de acessa o banco com algo do tipo 'Banco::find(1)', utilizo um cache ocm essa informações todas salvas.
+    1 -) Session do usuário em cache: Ao puxar as informações do usuário pela primeira vez, salva as informações necessárias no cache, adicionar um tempo para vencer essas informações e a session cair;
+    2 -) Loops encadeados: Dentro de um loop encadeado, caso precise acessar informações no banco, é interessante salvar as informações que preciso dentro de cache. Exemplo: Se dentro de cada loop preciso pesquisar o nome de um objeto a partir do ID, inveés de acessa o banco com algo do tipo `Banco::find(1)`, utilizo um cache ocm essa informações todas salvas.
 
 # Laravel Cache
 
@@ -57,7 +66,7 @@ Exemplos de utilização:
             - Uma boa opção para aplicações que já utilizam AWA e precisam integrar cache distribuído.
             - Pode ter custos maiores, dependendo do colume de operações e da configuração escolhida.
 
-# arquivo .env
+# Arquivo .env
 
   É no env que podemos escolher qual dos drivers usar na apliação laravel.
   Por padrão o tipop vem como file, mas é só mudar para o que deseja
@@ -69,5 +78,5 @@ Exemplos de utilização:
       - O redis DB tem capacidade para configurar ate 16 DB, podendo ser nomeados no 'REDIS_CACHE_DB=' de 0 à 15;
 
   ** Cache prefix: de forma default, vai nomear as chaves dos caches utilizando o nome da aplicação e outras informações do env.
-      De inicio, pode configurar o atributo 'CACHE_PREFIX=null', para evitar nomeclaturas.
+      De inicio, pode configurar o atributo `CACHE_PREFIX=null`s, para evitar nomeclaturas.
       Um erro comum de acontecer, é não conseguir consultar os cache por conta da utilização desse prefix; ou em produção usar um tipo de prefix e em homologação usar outra.
