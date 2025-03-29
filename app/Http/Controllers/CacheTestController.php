@@ -12,7 +12,7 @@ class CacheTestController extends Controller
         $result = [];
         // $result = CacheTestService::all(); // não usado
         // $result = CacheTestService::consulta_chave();
-        // $result = CacheTestService::alternando_entre_conexoes();
+        $result = CacheTestService::alternando_entre_conexoes();
         // $result = CacheTestService::checar_se_chave_existe();
         // $result = CacheTestService::aumentar_diminuir_chave();
         // $result = CacheTestService::salvar_tabela_cache_temporario();
@@ -22,7 +22,7 @@ class CacheTestController extends Controller
         // $result = CacheTestService::usando_helper();
         // $result = CacheTestService::travar_chave();
         // $result = CacheTestService::trava_alternativa(); 
-        $result = CacheTestService::tags();
+        // $result = CacheTestService::tags();
         return response()->json($result ? $result : ['erro' => 'nenhuma mensagem disponível'], 200);
     }
 }

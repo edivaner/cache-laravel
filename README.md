@@ -2,10 +2,18 @@
  - 1 `copy .env.example .env` ou `cp .env.example .env`
  - 2 mudar no arquivo .env: `CACHE_DRIVER=redis`
  - 3 `docker-compose up -d --build`
- - 4 `docker exec -it cache-laravel_laravel.test_1`(sem terminal wsl2)
+ - 4 `docker exec -it cache-laravel_laravel.test_1 bash`(sem terminal wsl2)
  - 5 `composer install` ou `composer update`
  - 6 Dentro do container execute `php artisan key:generate` (se estiver sem terminal wsl2)
     * OU  `./vendor/bin/sail artisan key:generate` (com terminal wls2)
+ - 7 Saia do container `exit`
+ - 8 Acessar `http://localhost:80/cache` 
+
+# testes com phpunit
+ A aplicação tem o Redis no Docker, para rodar executar com os teste utilize o comando de testes através do docker
+ ` docker exec cache-laravel-laravel.test-1 php artisan test ` 
+ Direcionar ao arquivo  ` docker exec cache-laravel-laravel.test-1 php artisan test tests/Unit/CacheTest.php` 
+
 
 # Cache
 
@@ -76,7 +84,10 @@ Exemplos de utilização:
   * Para o DynamoDB, existe os campos com prefixo "AWS_" e "DYNAMODB_", como 'AWS_ACCESS_KEY_ID' e 'DYNAMODB_CACHE_TABLE'.
   * Para redis, o prefixo "REDIS_", como o 'REDIS_URL', 'REDIS_HOST', 'REDIS_USERNAME' e etc. Esses atriutos são consumidos/utiulizados nas configurações do redis no arquivo ``config/database.php``
       - O redis DB tem capacidade para configurar ate 16 DB, podendo ser nomeados no 'REDIS_CACHE_DB=' de 0 à 15;
+  * Caso esteja usando docker utilizar `REDIS_HOST=redis` indicando o nome do serviço do redis definido no 'docker-compose.yml' 
 
   ** Cache prefix: de forma default, vai nomear as chaves dos caches utilizando o nome da aplicação e outras informações do env.
       De inicio, pode configurar o atributo `CACHE_PREFIX=null`s, para evitar nomeclaturas.
       Um erro comum de acontecer, é não conseguir consultar os cache por conta da utilização desse prefix; ou em produção usar um tipo de prefix e em homologação usar outra.
+
+

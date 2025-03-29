@@ -97,6 +97,7 @@ class CacheTestService
         // com valor padrão
         $resultado['consulta_2'] = Cache::get($nome_da_chave, 'Se aparecer essa mensagem então dê like no vídeo!');
 
+        // Grava um cache para essa chave
         Cache::put($nome_da_chave, $valor);
         
         $resultado['consulta_3'] = Cache::get($nome_da_chave, "sem default");
@@ -104,27 +105,28 @@ class CacheTestService
         return $resultado;
     }
 
-    public static function alternando_entre_conexoes($nome_da_chave = null, $nome_conexao = null ):array{
+    public static function alternando_entre_conexoes($nome_da_chave = null, $nome_conexao_padrao = null ):array{
         $resultado = [];
         $nome_da_chave ??= 'dev tech tips';
-        $nome_conexao ??= env('CACHE_DRIVER','redis');
-        $nome_conexao2 = self::NOME_CONEXAO_CACHE_ALTERNATIVO;
         $valor ??= 'conteúdo 2 vezes por semana.';
-        $valor2 ??= 'Se inscreva ne canal.';
-        // $resultado['cache_limpo'] = self::limpar_cache();
-        // $resultado['cache_alternativo_limpo'] = self::limpar_cache($nome_conexao2);
+
+        $nome_conexao_padrao ??= env('CACHE_DRIVER','redis');
+        $nome_conexao_alternativa = self::NOME_CONEXAO_CACHE_ALTERNATIVO;
+        
+        $resultado['cache_limpo'] = self::limpar_cache();
+        $resultado['cache_alternativo_limpo'] = self::limpar_cache($nome_conexao_alternativa);
 
         /** CONEXAO 1 */
-        $resultado['consulta_1'] = Cache::store($nome_conexao)->get($nome_da_chave);
+        $resultado['consulta_1'] = Cache::store($nome_conexao_padrao)->get($nome_da_chave);
         
         Cache::put($nome_da_chave, $valor);
-        $resultado['consulta_2'] = Cache::store($nome_conexao)->get($nome_da_chave);
+        $resultado['consulta_2'] = Cache::store($nome_conexao_padrao)->get($nome_da_chave);
 
         
         /** CONEXAO 2 */
-        $resultado['consulta_3'] = Cache::store($nome_conexao2)->get($nome_da_chave);
-        Cache::store($nome_conexao2)->put($nome_da_chave, $valor." | conexao 2");
-        $resultado['consulta_4'] = Cache::store($nome_conexao2)->get($nome_da_chave);
+        $resultado['consulta_3'] = Cache::store($nome_conexao_alternativa)->get($nome_da_chave);
+        Cache::store($nome_conexao_alternativa)->put($nome_da_chave, $valor." | conexao 2");
+        $resultado['consulta_4'] = Cache::store($nome_conexao_alternativa)->get($nome_da_chave);
 
         return $resultado;
     }
