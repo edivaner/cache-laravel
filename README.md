@@ -9,10 +9,29 @@
  - 7 Saia do container `exit`
  - 8 Acessar `http://localhost:80/cache` 
 
-# testes com phpunit
- A aplicação tem o Redis no Docker, para rodar executar com os teste utilize o comando de testes através do docker
+# EXECUTAR APLICAÇÃO COM OS TESTE PHPUNIT
+ - A aplicação tem o Redis no Docker, para rodar executar com os teste utilize o comando de testes através do docker
  ` docker exec cache-laravel-laravel.test-1 php artisan test ` 
- Direcionar ao arquivo  ` docker exec cache-laravel-laravel.test-1 php artisan test tests/Unit/CacheTest.php` 
+ - Direcionar ao arquivo  ` docker exec cache-laravel-laravel.test-1 php artisan test tests/Unit/CacheTest.php ` 
+ - Utilizar filtro para executar um test especifico:
+  ` docker exec cache-laravel-laravel.test-1 php artisan test tests/Unit/CacheTest.php --filter="testChecarSeChaveExiste"` 
+
+# Arquivo .env
+
+  É no env que podemos escolher qual dos drivers usar na apliação laravel.
+  Por padrão o tipop vem como file, mas é só mudar para o que deseja
+  ` CACHE_DRIVER=file ` => ` CACHE_DRIVER=redis `
+
+  * Existe outras variaveis para drivers expecificos, como por exemplo para o memcached tem os 'MEMCACHED_USERNAME', 'MEMCACHED_PASSWORD' e etc, todos começam o o prefixo "MEMCACHED_".
+  * Para o DynamoDB, existe os campos com prefixo "AWS_" e "DYNAMODB_", como 'AWS_ACCESS_KEY_ID' e 'DYNAMODB_CACHE_TABLE'.
+  * Para redis, o prefixo "REDIS_", como o 'REDIS_URL', 'REDIS_HOST', 'REDIS_USERNAME' e etc. Esses atriutos são consumidos/utiulizados nas configurações do redis no arquivo ``config/database.php``
+      - O redis DB tem capacidade para configurar ate 16 DB, podendo ser nomeados no 'REDIS_CACHE_DB=' de 0 à 15;
+  * Caso esteja usando docker utilizar `REDIS_HOST=redis` indicando o nome do serviço do redis definido no 'docker-compose.yml' 
+
+  * Cache prefix: de forma default, vai nomear as chaves dos caches utilizando o nome da aplicação e outras informações do env.
+      De inicio, pode configurar o atributo `CACHE_PREFIX=null`s, para evitar nomeclaturas.
+      Um erro comum de acontecer, é não conseguir consultar os cache por conta da utilização desse prefix; ou em produção usar um tipo de prefix e em homologação usar outra.
+
 
 
 # Cache
@@ -23,7 +42,7 @@
 
 Exemplos de utilização: 
     1 -) Session do usuário em cache: Ao puxar as informações do usuário pela primeira vez, salva as informações necessárias no cache, adicionar um tempo para vencer essas informações e a session cair;
-    2 -) Loops encadeados: Dentro de um loop encadeado, caso precise acessar informações no banco, é interessante salvar as informações que preciso dentro de cache. Exemplo: Se dentro de cada loop preciso pesquisar o nome de um objeto a partir do ID, inveés de acessa o banco com algo do tipo `Banco::find(1)`, utilizo um cache ocm essa informações todas salvas.
+    2 -) Loops encadeados: Dentro de um loop encadeado, caso precise acessar informações no banco, é interessante salvar as informações que preciso dentro de cache. Exemplo: Se dentro de cada loop preciso pesquisar o nome de um objeto a partir do ID, inveés de acessa o banco com algo do tipo ` Banco::find(1)`, utilizo um cache ocm essa informações todas salvas.
 
 # Laravel Cache
 
@@ -74,20 +93,32 @@ Exemplos de utilização:
             - Uma boa opção para aplicações que já utilizam AWA e precisam integrar cache distribuído.
             - Pode ter custos maiores, dependendo do colume de operações e da configuração escolhida.
 
-# Arquivo .env
+# Alguns métodos 
+    - Cache::store(): serve para acessar diferentes armazenamentos de cache configurados. Usado em casos onde precisa trocar o Driver para acessar os caches. Sem utilizar ` store ` O cache vai acessar a o drive padrão configurado no .env
+    
+    - Cache::put($nomeChave, $valor, $tempoDeVida = null): Salva o $valor dentro do cache com o nome #nomeChave, pode adicionar um tempo de vida para essa chave, mas não é obrigatório.
 
-  É no env que podemos escolher qual dos drivers usar na apliação laravel.
-  Por padrão o tipop vem como file, mas é só mudar para o que deseja
-  ` CACHE_DRIVER=file ` => ` CACHE_DRIVER=redis `
+    - Cache::get($nomeChave, $valorDefaultRetornado): Essa função retorna o valor configurado no cache definido como 'nomeChave' (primeiro parâmetro), Se o cache não existe, retorna o valor configurado como 'valorDefaltRetornado'(segundo parâmetro), os 'NULL' se não estiver nada configurado.
+    
+    - Cache::has($nomeChame): Retorna true se existe cache configurado com essa chave, e false caso não exista;
 
-  * Existe outras variaveis para drivers expecificos, como por exemplo para o memcached tem os 'MEMCACHED_USERNAME', 'MEMCACHED_PASSWORD' e etc, todos começam o o prefixo "MEMCACHED_".
-  * Para o DynamoDB, existe os campos com prefixo "AWS_" e "DYNAMODB_", como 'AWS_ACCESS_KEY_ID' e 'DYNAMODB_CACHE_TABLE'.
-  * Para redis, o prefixo "REDIS_", como o 'REDIS_URL', 'REDIS_HOST', 'REDIS_USERNAME' e etc. Esses atriutos são consumidos/utiulizados nas configurações do redis no arquivo ``config/database.php``
-      - O redis DB tem capacidade para configurar ate 16 DB, podendo ser nomeados no 'REDIS_CACHE_DB=' de 0 à 15;
-  * Caso esteja usando docker utilizar `REDIS_HOST=redis` indicando o nome do serviço do redis definido no 'docker-compose.yml' 
+    - Cache::increment($nomeChave, $valorParaIncrementar): Incrementa dentro do cache, um valor definido no segundo paramento. 
+    
+    - Cache::decrement($nomeChave, $valorParaIncrementar): Decrementa dentro do cache, um valor definido no segundo paramento. 
 
-  ** Cache prefix: de forma default, vai nomear as chaves dos caches utilizando o nome da aplicação e outras informações do env.
-      De inicio, pode configurar o atributo `CACHE_PREFIX=null`s, para evitar nomeclaturas.
-      Um erro comum de acontecer, é não conseguir consultar os cache por conta da utilização desse prefix; ou em produção usar um tipo de prefix e em homologação usar outra.
+    - Cache:remember($keyDoCache, $tempoDeVidaEmSegundos, $functionCallback): Recupera o valor do $keyDoCahce, se existir. Mas caso não exista, serve para guardar o valor por X segundos, adquirindo a informação pela função de callback definida na propria função;
+
+    - Cache::rememberForever($keyDoCache, $callback): Semelhante ao remember, porém esse não tem tempo de vida, é para sempre (forever), só vai deixar de existir quando limpar o cache, com o php artisan cache:clear por exemplo. 
+
+    - Cache::pull($nomeChave, $default): Retorna o valor de um cache e apaga logo em seguida. Se o valor do cache não existir, retorna o valor default configurado, ou 'null' se não tiver default.
+
+    - Cache::add($chave, $valor, $tempoDeVida): Se a chave cache não existir, cria e adiciona o valor. Se já existe, não faz nada.
+
+    - Cache::forever($chave, $valor): Salva a informação do $valor no $chave, porém ao contrário do put, esse não tem tempo de vida, podendo ser para sempre (forever).
+
+    - cache([$chave => $valor], $tempoDeVida): MEtodo do próprio Laravel para salvar um cache. É necessário importar a clase do Cache para usa-lo.
+
+    - cache()->getMultiple([$variasChavesDeCache]): Retorna a chave e o valor de cada uma, em formato de interable. Pertence aos metodos de helper cache do laravel
+
 
 

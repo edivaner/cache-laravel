@@ -157,7 +157,7 @@ class CacheTestService
         $nome_da_chave_negativa ??= 'deslikes';
         $valor_de_incrementacao = rand(1,15);
         $valor_de_decrementacao = rand(1,3);
-        // $resultado['cache_limpo'] = self::limpar_cache();
+        $resultado['cache_limpo'] = self::limpar_cache();
 
         $resultado[$nome_da_chave_positiva] = Cache::increment($nome_da_chave_positiva, $valor_de_incrementacao);
         $resultado[$nome_da_chave_negativa] = Cache::decrement($nome_da_chave_negativa, $valor_de_decrementacao);
@@ -186,25 +186,32 @@ class CacheTestService
         return ['valores_tabela' => Cache::get($nome_tabela)];
     }
 
-    public static function consultar_e_remover():array{
+    public static function consultar_e_remover($nome_da_chave = null, $valor = null):array{
         $resultado = [];
         $nome_da_chave ??= 'dev tech tips';
         $resultado['cache_limpo'] = self::limpar_cache();
         $valor ??= 'conteúdo 2 vezes por semana.';
+        
         $resultado['consulta_1'] = Cache::pull($nome_da_chave, 'valor padrão'); // pega e deleta
+
         Cache::put($nome_da_chave, $valor);
         $resultado['consulta_2'] = Cache::pull($nome_da_chave, 'valor padrão'); // pega e deleta
         $resultado['consulta_3'] = Cache::pull($nome_da_chave); // pega e deleta
-        // Cache::forget($nome_da_chave);
+        
+        // $resultado['consulta_4'] = Cache::forget($nome_da_chave);
         return $resultado;
     }
 
-    public static function salvar_valor():array{
+    public static function salvar_valor($validarTempoDeVida = false):array{
         $resultado = [];
-        return Cache::get(["put_com_ttl","put_sem_ttl","put_com_ttl_agendado","add_com_ttl","forever"]);
+
+        if ($validarTempoDeVida) {
+            return Cache::get(["put_com_ttl","put_sem_ttl","put_com_ttl_agendado","add_com_ttl","forever"]);
+        }
+
         $resultado['cache_limpo'] = self::limpar_cache();
 
-        $tempo_de_vida_em_segundos = 10; //10 segundos
+        $tempo_de_vida_em_segundos = 1; //10 segundos
         $chaves[] = $chave = "put_com_ttl"; //ttl = time to life
         $valor = 1;
         Cache::put($chave, $valor, $tempo_de_vida_em_segundos);
@@ -218,7 +225,7 @@ class CacheTestService
         Cache::put($chave, $valor, now()->addMinutes(5));
         
         $chaves[] = $chave = "add_com_ttl";
-        $tempo_de_vida_em_segundos = 20; //20 segundos
+        $tempo_de_vida_em_segundos = 1; //20 segundos
         $valor = 4;
         Cache::add($chave, $valor, $tempo_de_vida_em_segundos); // se ñ existe, cria. Se já existe não faz nada
 
