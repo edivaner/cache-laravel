@@ -19,10 +19,10 @@ class CacheTestController extends Controller
         // $result = CacheTestService::salvar_tabela_cache();
         // $result = CacheTestService::consultar_e_remover();
         // $result = CacheTestService::salvar_valor();
-        $result = CacheTestService::usando_helper();
+        // $result = CacheTestService::usando_helper();
         // $result = CacheTestService::travar_chave();
         // $result = CacheTestService::trava_alternativa(); 
-        // $result = CacheTestService::tags();
+        $result = CacheTestService::tags();
         return response()->json($result ? $result : ['erro' => 'nenhuma mensagem disponível'], 200);
     }
 }

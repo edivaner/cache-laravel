@@ -255,7 +255,7 @@ class CacheTestService
         $resultado = null;
         if ($lock->get()) {
             $resultado = 'destravado';
-            // $lock->release(); // remove a trava
+            $lock->release(); // remove a trava
         }
 
         $resultado2 = [];

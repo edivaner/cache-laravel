@@ -120,5 +120,22 @@ Exemplos de utilização:
 
     - cache()->getMultiple([$variasChavesDeCache]): Retorna a chave e o valor de cada uma, em formato de interable. Pertence aos metodos de helper cache do laravel
 
+    - Cache::lock($chave, $ttl, $dono): Cria um cache de trava temporária enquanto durar o tempo de vida, mas não pode ser apagada facilmente. É util para garantir um processo seja executado uma vez em determinada lógica de filas e jobs, depois de processado, podemos liberar manualmente.
+        O lock possui alguns comandos:
+            - $lock->get(): Ao instanciar uma variavel com o ` lock() `, essa variável pode chamar o método get(), para validar se o lock já esta travado E BLOQUEAR O LOCK DEPOIS DE VERIFICAR. True: DESBLOQUEADO e False: bloqueado;
+            - $lock->release(): Libera o lock manualmente, (sem precisar do $ttl);
+            - $lock->block($ttl, $callback): Bloqueia o lock sem verificar antes de bloquear, como o get faz.
+    
+    - Cache::tag([$array]): inilializa tags, ou categoria, para um cache que será definido usando o ->put(). Organiza e limpa caches de forma seletiva, agrupando as chaves/valores do cache em uma ou mais tags (categoria);
+
+        - No exemplo, criou as tags 'pessoa' e 'modelos', para a chave 'Alberto' que tem o valor 'homem'
+          ` Cache::tags(['pessoa', 'modelos'])->put('Alberto', "homem", $ttl); `
+        
+        - Neste exemplo conseguimos o retorno da chave, que é 'homem'.
+           ` Cache::tags(['pessoa', 'modelos'])->get('Alberto') ` 
+        
+        * As Tags, precisam esta na mesma ordem e tipo de dados que foram instânciadas, para identificar corretamente.
+        * Não funciona com o driver "file", apenas com memcached, redis, dynamodb, database e array. 
+
 
 
